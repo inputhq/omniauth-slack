@@ -64,6 +64,16 @@ module OmniAuth
         end
       end
 
+      def custom_build_access_token
+        redirect_uri = request.params['redirect_uri'] || request.base_url + request.path
+        client.auth_code.get_token(request.params['code'], get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
+      end
+      alias_method :build_access_token, :custom_build_access_token
+
+      def get_token_options(redirect_uri)
+         { :redirect_uri => redirect_uri }.merge(token_params.to_hash(:symbolize_keys => true))
+       end
+
       def identity
         @identity ||= access_token.get('/api/users.identity').parsed
       end
